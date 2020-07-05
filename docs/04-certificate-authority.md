@@ -106,7 +106,7 @@ Generate a certificate and private key for each Kubernetes worker node:
 ```
 for i in 0 1 2; do
   instance="worker-${i}"
-  instance_hostname="ip-10-0-1-2${i}"
+  instance_hostname="worker-${i}"
   cat > ${instance}-csr.json <<EOF
 {
   "CN": "system:node:${instance_hostname}",
@@ -126,13 +126,13 @@ for i in 0 1 2; do
 }
 EOF
 
-  external_ip=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=${instance}" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+  external_ip=$(doctl compute droplet list worker-${i} \
+    --output json | jq -cr '.[].networks.v4 | .[] \
+    | select(.type == "public") | .ip_address')
 
-  internal_ip=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=${instance}" \
-    --output text --query 'Reservations[].Instances[].PrivateIpAddress')
+  internal_ip=$(doctl compute droplet list worker-${i} \
+    --output json | jq -cr '.[].networks.v4 | .[] \
+    | select(.type == "private") | .ip_address')
 
   cfssl gencert \
     -ca=ca.pem \
@@ -366,9 +366,9 @@ Copy the appropriate certificates and private keys to each worker instance:
 
 ```
 for instance in worker-0 worker-1 worker-2; do
-  external_ip=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=${instance}" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+  external_ip=$(doctl compute droplet list ${i} \
+    --output json | jq -cr '.[].networks.v4 | .[] \
+    | select(.type == "public") | .ip_address')
 
   scp -i kubernetes.id_rsa ca.pem ${instance}-key.pem ${instance}.pem ubuntu@${external_ip}:~/
 done
@@ -378,9 +378,9 @@ Copy the appropriate certificates and private keys to each controller instance:
 
 ```
 for instance in controller-0 controller-1 controller-2; do
-  external_ip=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=${instance}" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+  external_ip=$(doctl compute droplet list ${i} \
+    --output json | jq -cr '.[].networks.v4 | .[] \
+    | select(.type == "public") | .ip_address')
 
   scp -i kubernetes.id_rsa \
     ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem \

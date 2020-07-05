@@ -37,7 +37,7 @@ This tutorial assumes you have access to [Digital Ocean](https://www.digitalocea
 * [Prerequisites](docs/01-prerequisites.md)
 * [Installing the Client Tools](docs/02-client-tools.md)
 * [Provisioning Compute Resources](docs/03-compute-resources.md) - WIP
-* [Provisioning the CA and Generating TLS Certificates](docs/04-certificate-authority.md) - WIP
+* [Provisioning the CA and Generating TLS Certificates](docs/04-certificate-authority.md)
 * [Generating Kubernetes Configuration Files for Authentication](docs/05-kubernetes-configuration-files.md) - WIP
 * [Generating the Data Encryption Config and Key](docs/06-data-encryption-keys.md) - WIP
 * [Bootstrapping the etcd Cluster](docs/07-bootstrapping-etcd.md) - WIP
