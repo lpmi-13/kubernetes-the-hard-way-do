@@ -13,9 +13,8 @@ Each kubeconfig requires a Kubernetes API Server to connect to. To support high 
 Retrieve the `kubernetes-the-hard-way` DNS address:
 
 ```
-KUBERNETES_PUBLIC_ADDRESS=$(aws elbv2 describe-load-balancers \
-  --load-balancer-arns ${LOAD_BALANCER_ARN} \
-  --output text --query 'LoadBalancers[0].DNSName')
+KUBERNETES_PUBLIC_ADDRESS=$(doctl compute load-balancer list \
+  --output json | jq -r '.[].ip')
 ```
 
 ### The kubelet Kubernetes Configuration File
@@ -189,9 +188,9 @@ Copy the appropriate `kubelet` and `kube-proxy` kubeconfig files to each worker 
 
 ```
 for instance in worker-0 worker-1 worker-2; do
-  external_ip=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=${instance}" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+  external_ip=$(doctl compute droplet list ${i} \
+    --output json | jq -cr '.[].networks.v4 | .[] \
+    | select(.type == "public") | .ip_address')
 
   scp -i kubernetes.id_rsa \
     ${instance}.kubeconfig kube-proxy.kubeconfig ubuntu@${external_ip}:~/
@@ -202,9 +201,9 @@ Copy the appropriate `kube-controller-manager` and `kube-scheduler` kubeconfig f
 
 ```
 for instance in controller-0 controller-1 controller-2; do
-  external_ip=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=${instance}" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+  external_ip=$(doctl compute droplet list ${i} \
+    --output json | jq -cr '.[].networks.v4 | .[] \
+    | select(.type == "public") | .ip_address')
   
   scp -i kubernetes.id_rsa \
     admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig ubuntu@${external_ip}:~/
