@@ -127,12 +127,10 @@ for i in 0 1 2; do
 EOF
 
   external_ip=$(doctl compute droplet list worker-${i} \
-    --output json | jq -cr '.[].networks.v4 | .[] \
-    | select(.type == "public") | .ip_address')
+    --output json | jq -cr '.[].networks.v4 | .[] select(.type == "public") | .ip_address')
 
   internal_ip=$(doctl compute droplet list worker-${i} \
-    --output json | jq -cr '.[].networks.v4 | .[] \
-    | select(.type == "private") | .ip_address')
+    --output json | jq -cr '.[].networks.v4 | .[] select(.type == "private") | .ip_address')
 
   cfssl gencert \
     -ca=ca.pem \
@@ -305,7 +303,7 @@ cfssl gencert \
   -ca=ca.pem \
   -ca-key=ca-key.pem \
   -config=ca-config.json \
-  -hostname=10.32.0.1,10.0.1.10,10.0.1.11,10.0.1.12,${KUBERNETES_PUBLIC_ADDRESS},127.0.0.1,kubernetes.default \
+  -hostname=10.32.0.1,10.0.0.3,10.0.0.4,10.0.0.5,${KUBERNETES_PUBLIC_ADDRESS},127.0.0.1,kubernetes.default \
   -profile=kubernetes \
   kubernetes-csr.json | cfssljson -bare kubernetes
 ```
@@ -366,11 +364,10 @@ Copy the appropriate certificates and private keys to each worker instance:
 
 ```
 for instance in worker-0 worker-1 worker-2; do
-  external_ip=$(doctl compute droplet list ${i} \
-    --output json | jq -cr '.[].networks.v4 | .[] \
-    | select(.type == "public") | .ip_address')
+  external_ip=$(doctl compute droplet list ${instance} \
+    --output json | jq -cr '.[].networks.v4 | .[] select(.type == "public") | .ip_address')
 
-  scp -i kubernetes.id_rsa ca.pem ${instance}-key.pem ${instance}.pem ubuntu@${external_ip}:~/
+  scp -i kubernetes.id_rsa ca.pem ${instance}-key.pem ${instance}.pem root@${external_ip}:~/
 done
 ```
 
@@ -378,13 +375,12 @@ Copy the appropriate certificates and private keys to each controller instance:
 
 ```
 for instance in controller-0 controller-1 controller-2; do
-  external_ip=$(doctl compute droplet list ${i} \
-    --output json | jq -cr '.[].networks.v4 | .[] \
-    | select(.type == "public") | .ip_address')
+  external_ip=$(doctl compute droplet list ${instance} \
+    --output json | jq -cr '.[].networks.v4 | .[] select(.type == "public") | .ip_address')
 
   scp -i kubernetes.id_rsa \
     ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem \
-    service-account-key.pem service-account.pem ubuntu@${external_ip}:~/
+    service-account-key.pem service-account.pem root@${external_ip}:~/
 done
 ```
 

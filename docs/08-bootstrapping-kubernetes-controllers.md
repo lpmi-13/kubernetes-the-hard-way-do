@@ -8,11 +8,10 @@ The commands in this lab must be run on each controller instance: `controller-0`
 
 ```
 for instance in controller-0 controller-1 controller-2; do
-  external_ip=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=${instance}" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+  external_ip=$(doctl compute droplet list ${i} \
+    --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-  echo ssh -i kubernetes.id_rsa ubuntu@$external_ip
+  echo ssh -i kubernetes.id_rsa root@$external_ip
 done
 ```
 
@@ -62,7 +61,7 @@ sudo mv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem \
 The instance internal IP address will be used to advertise the API Server to members of the cluster. Retrieve the internal IP address for the current compute instance:
 
 ```
-INTERNAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+INTERNAL_IP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address)
 ```
 
 Create the `kube-apiserver.service` systemd unit file:
@@ -89,7 +88,7 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --etcd-cafile=/var/lib/kubernetes/ca.pem \\
   --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \\
   --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \\
-  --etcd-servers=https://10.0.1.10:2379,https://10.0.1.11:2379,https://10.0.1.12:2379 \\
+  --etcd-servers=https://10.0.0.3:2379,https://10.0.0.4:2379,https://10.0.0.5:2379 \\
   --event-ttl=1h \\
   --encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
   --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \\
@@ -229,11 +228,10 @@ In this section you will configure RBAC permissions to allow the Kubernetes API 
 The commands in this section will effect the entire cluster and only need to be run once from one of the controller nodes.
 
 ```
-external_ip=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=controller-0" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+external_ip=$(doctl compute droplet list controller-0 \
+  --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-ssh -i kubernetes.id_rsa ubuntu@${external_ip}
+ssh -i kubernetes.id_rsa root@${external_ip}
 ```
 
 Create the `system:kube-apiserver-to-kubelet` [ClusterRole](https://kubernetes.io/docs/admin/authorization/rbac/#role-and-clusterrole) with permissions to access the Kubelet API and perform most common tasks associated with managing pods:
@@ -290,9 +288,8 @@ Run this command on the machine from where you started setup (e.g. Your personal
 Retrieve the `kubernetes-the-hard-way` Load Balancer address:
 
 ```
-KUBERNETES_PUBLIC_ADDRESS=$(aws elbv2 describe-load-balancers \
-  --load-balancer-arns ${LOAD_BALANCER_ARN} \
-  --output text --query 'LoadBalancers[].DNSName')
+KUBERNETES_PUBLIC_ADDRESS=$(doctl compute load-balancer list \
+  --output json | jq -r '.[].ip')
 ```
 
 Make a HTTP request for the Kubernetes version info:

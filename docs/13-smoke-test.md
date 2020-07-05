@@ -15,11 +15,10 @@ kubectl create secret generic kubernetes-the-hard-way --from-literal="mykey=myda
 Print a hexdump of the `kubernetes-the-hard-way` secret stored in etcd:
 
 ```sh
-external_ip=$(aws ec2 describe-instances \
-  --filters "Name=tag:Name,Values=controller-0" \
-  --output text --query 'Reservations[].Instances[].PublicIpAddress')
+external_ip=$(doctl compute droplet list controller-0 \
+  --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-ssh -i kubernetes.id_rsa ubuntu@${external_ip}
+ssh -i kubernetes.id_rsa root@${external_ip}
 ```
 Run below command in controller-0
 
@@ -184,11 +183,9 @@ NODE_PORT=$(kubectl get svc nginx \
 Create a firewall rule that allows remote access to the `nginx` node port:
 
 ```
-aws ec2 authorize-security-group-ingress \
-  --group-id ${SECURITY_GROUP_ID} \
-  --protocol tcp \
-  --port ${NODE_PORT} \
-  --cidr 0.0.0.0/0
+FIREWALL_ID=$(doctl firewall list -o json | jq -cr '.[].id'
+doctl compute firewall add-rules ${FIREWALL_ID} \
+  --inbound-rules protocol:tcp,ports:${NODE_PORT},address:0.0.0.0/0
 ```
 
 Retrieve the external IP address of a worker instance:
@@ -197,20 +194,9 @@ Retrieve the external IP address of a worker instance:
 INSTANCE_NAME=$(kubectl get pod $POD_NAME --output=jsonpath='{.spec.nodeName}')
 ```
 
-If you deployed the cluster on US-EAST-1 use the command below:
-
 ```
-EXTERNAL_IP=$(aws ec2 describe-instances \
-    --filters "Name=network-interface.private-dns-name,Values=${INSTANCE_NAME}.ec2.internal" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
-```
-
-If you deployed the cluster on ANY OTHER region use this command:
-
-```
-EXTERNAL_IP=$(aws ec2 describe-instances \
-    --filters "Name=network-interface.private-dns-name,Values=${INSTANCE_NAME}.${AWS_REGION}.compute.internal" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+EXTERNAL_IP=$(doctl compute droplet list ${INSTANCE_NAME} \
+  --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 ```
 
 Make an HTTP request using the external IP address and the `nginx` node port:
@@ -281,23 +267,14 @@ INSTANCE_NAME=$(kubectl get pod untrusted --output=jsonpath='{.spec.nodeName}')
 If you deployed the cluster on US-EAST-1 use the command below:
 
 ```
-INSTANCE_IP=$(aws ec2 describe-instances \
-    --filters "Name=network-interface.private-dns-name,Values=${INSTANCE_NAME}.ec2.internal" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
-```
-
-If you deployed the cluster on ANY OTHER region use this command:
-
-```
-INSTANCE_IP=$(aws ec2 describe-instances \
-    --filters "Name=network-interface.private-dns-name,Values=${INSTANCE_NAME}.${AWS_REGION}.compute.internal" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+INSTANCE_IP=$(doctl compute droplet list ${INSTANCE_NAME} \
+  --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 ```
 
 SSH into the worker node:
 
 ```
-ssh -i kubernetes.id_rsa ubuntu@${INSTANCE_IP}
+ssh -i kubernetes.id_rsa root@${INSTANCE_IP}
 ```
 
 List the containers running under gVisor:
@@ -368,11 +345,10 @@ I0514 14:05:16.501354   15096 x:0] Exiting with status: 0
 Log in to a worker node. You can do this on all 3 workers to see the resources on each of them:
 
 ```sh
-external_ip=$(aws ec2 describe-instances \
-  --filters "Name=tag:Name,Values=worker-0" \
-  --output text --query 'Reservations[].Instances[].PublicIpAddress')
+external_ip=$(doctl compute droplet list worker-0 \
+  --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-ssh -i kubernetes.id_rsa ubuntu@${external_ip}
+ssh -i kubernetes.id_rsa root@${external_ip}
 ```
 Run following commands and check output
 

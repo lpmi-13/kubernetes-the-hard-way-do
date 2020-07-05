@@ -114,7 +114,8 @@ kubectl version --client
 Client Version: version.Info{Major:"1", Minor:"17", GitVersion:"v1.17.2", GitCommit:"59603c6e503c87169aea6106f57b9f242f64df89", GitTreeState:"clean", BuildDate:"2020-01-23T14:21:36Z", GoVersion:"go1.13.6", Compiler:"gc", Platform:"darwin/amd64"}
 ```
 
-## Install jq (because Digital Ocean doesn't have any nice output filtering on resource creation)
+## Install jq
+(because Digital Ocean doesn't have any nice output filtering on resource creation)
 
 for non-standard systems, follow the instructions [here](https://stedolan.github.io/jq/download/).
 

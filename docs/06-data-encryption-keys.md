@@ -36,11 +36,10 @@ Copy the `encryption-config.yaml` encryption config file to each controller inst
 
 ```
 for instance in controller-0 controller-1 controller-2; do
-  external_ip=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=${instance}" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+  external_ip=$(doctl compute droplet list ${instance} \
+    --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
   
-  scp -i kubernetes.id_rsa encryption-config.yaml ubuntu@${external_ip}:~/
+  scp -i kubernetes.id_rsa encryption-config.yaml root@${external_ip}:~/
 done
 ```
 

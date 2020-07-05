@@ -8,11 +8,10 @@ The commands in this lab must be run on each worker instance: `worker-0`, `worke
 
 ```
 for instance in worker-0 worker-1 worker-2; do
-  external_ip=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=${instance}" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+  external_ip=$(doctl compute droplet list ${instance} \
+    --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-  echo ssh -i kubernetes.id_rsa ubuntu@$external_ip
+  echo ssh -i kubernetes.id_rsa root@$external_ip
 done
 ```
 
@@ -72,12 +71,10 @@ sudo tar -xvf containerd-1.3.2.linux-amd64.tar.gz -C /
 
 ### Configure CNI Networking
 
-Retrieve the Pod CIDR range for the current compute instance:
+Retrieve the number needed for the Pod CIDR based on the current hostname:
 
 ```
-POD_CIDR=$(curl -s http://169.254.169.254/latest/user-data/ \
-  | tr "|" "\n" | grep "^pod-cidr" | cut -d"=" -f2)
-echo "${POD_CIDR}"
+WORKER_NUMBER=$(hostname | cut -d '-' -f2)
 ```
 
 Create the `bridge` network configuration file:
@@ -94,7 +91,7 @@ cat <<EOF | sudo tee /etc/cni/net.d/10-bridge.conf
     "ipam": {
         "type": "host-local",
         "ranges": [
-          [{"subnet": "${POD_CIDR}"}]
+          [{"subnet": "10.200.${WORKER_NUMBER}.0/24"}]
         ],
         "routes": [{"dst": "0.0.0.0/0"}]
     }
@@ -168,8 +165,7 @@ EOF
 ### Configure the Kubelet
 
 ```
-WORKER_NAME=$(curl -s http://169.254.169.254/latest/user-data/ \
-| tr "|" "\n" | grep "^name" | cut -d"=" -f2)
+WORKER_NAME=$(hostame)
 echo "${WORKER_NAME}"
 
 sudo mv ${WORKER_NAME}-key.pem ${WORKER_NAME}.pem /var/lib/kubelet/
@@ -286,11 +282,10 @@ sudo systemctl start containerd kubelet kube-proxy
 List the registered Kubernetes nodes:
 
 ```
-external_ip=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=controller-0" \
-    --output text --query 'Reservations[].Instances[].PublicIpAddress')
+external_ip=$(doctl compute droplet list controller-0 \
+  --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-ssh -i kubernetes.id_rsa ubuntu@${external_ip}
+ssh -i kubernetes.id_rsa root@${external_ip}
 
 kubectl get nodes --kubeconfig admin.kubeconfig
 ```

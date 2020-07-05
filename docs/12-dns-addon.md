@@ -7,7 +7,7 @@ In this lab you will deploy the [DNS add-on](https://kubernetes.io/docs/concepts
 Deploy the `kube-dns` cluster add-on:
 
 ```
-kubectl create -f https://raw.githubusercontent.com/prabhatsharma/kubernetes-the-hard-way-aws/master/deployments/core-dns.yaml
+kubectl create -f https://raw.githubusercontent.com/lpmi-13/kubernetes-the-hard-way-do/main/deployments/core-dns.yaml
 ```
 
 > output
@@ -37,7 +37,7 @@ kube-dns-3097350089-gq015   3/3       Running   0          20s
 Create a `dnsutils` pod
 
 ```
-kubectl run busybox --image=busybox:1.28 --restart=Never -- sleep 3600
+kubectl run busybox --image=busybox:1.28.4 --restart=Never -- sleep 3600
 ```
 
 Verify that the pod is running:

@@ -7,33 +7,43 @@ In this lab you will delete the compute resources created during this tutorial.
 Delete the controller and worker compute instances:
 
 ```
-aws ec2 terminate-instances \
-  --instance-ids \
-    $(aws ec2 describe-instances \
-      --filter "Name=tag:Name,Values=controller-0,controller-1,controller-2,worker-0,worker-1,worker-2" \
-      --output text --query 'Reservations[].Instances[].InstanceId')
-aws ec2 delete-key-pair --key-name kubernetes
+for droplet_id in $(doctl compute droplet list --format ID --no-header --tag-name kubernetes); do
+  doctl compute droplet delete ${droplet_id} -f
+done
+
+```
+
+Delete the stored SSH key:
+```
+SSH_KEY_ID=$(doctl compute ssh-key list --output json \
+  | jq -cr '.[] | select(.name == "kubernetes-key") | .id')
+doctl compute ssh-key delete ${SSH_KEY_ID} -f
 ```
 
 ## Networking
 
-Delete the external load balancer network resources:
+Delete the external load balancer:
 
 ```
-aws elbv2 delete-load-balancer --load-balancer-arn "${LOAD_BALANCER_ARN}"
-aws elbv2 delete-target-group --target-group-arn "${TARGET_GROUP_ARN}"
-aws ec2 delete-security-group --group-id "${SECURITY_GROUP_ID}"
-ROUTE_TABLE_ASSOCIATION_ID="$(aws ec2 describe-route-tables \
-  --route-table-ids "${ROUTE_TABLE_ID}" \
-  --output text --query 'RouteTables[].Associations[].RouteTableAssociationId')"
-aws ec2 disassociate-route-table --association-id "${ROUTE_TABLE_ASSOCIATION_ID}"
+LOAD_BALANCER_ID=$(doctl compute load-balancer list --output json \
+  | jq -cr '.[] | select(.name == "kubernetes-lb") | .id')
+doctl compute load-balancer delete $LOAD_BALANCER_ID -f
 
-aws ec2 delete-route-table --route-table-id "${ROUTE_TABLE_ID}"
-aws ec2 detach-internet-gateway \
-  --internet-gateway-id "${INTERNET_GATEWAY_ID}" \
-  --vpc-id "${VPC_ID}"
-aws ec2 delete-internet-gateway --internet-gateway-id "${INTERNET_GATEWAY_ID}"
-aws ec2 delete-subnet --subnet-id "${SUBNET_ID}"
-aws ec2 delete-vpc --vpc-id "${VPC_ID}"
+```
+
+Delete the firewall:
+
+```
+FIREWALL_ID=$(doctl compute firewall list --output json \
+  | jq -cr '.[] | select(.name == "kuberenetes-firewall" | .id')
+doctl compute firewall delete ${FIREWALL_ID} -f
+```
+
+Delete the VPC:
+
+```
+VPC_ID=$(doctl vpcs list --output json \
+  | jq -cr '.[] | select(.name == "kubernetes") | .id')
+doctl vpcs delete ${VPC_ID} -f
 
 ```

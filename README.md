@@ -1,5 +1,7 @@
 # About
 
+**(NOTE: Extreme work in progress, and basically stopping all work on it until I can figure out either how to deploy flannel in here, or digital ocean implements some sort of route table mechanism a la AWS)**
+
 This is a fork of the outstanding [Kubernetes The Hard Way - AWS](https://github.com/prabhatsharma/kubernetes-the-hard-way-aws), itself a fork of the awesome [Kubernetes The Hard Way](https://github.com/kelseyhightower/kubernetes-the-hard-way) by Kelsey Hightower and is geared towards using it on Digital Ocean.
 
 1. Kubernetes v1.17.2
@@ -36,15 +38,15 @@ This tutorial assumes you have access to [Digital Ocean](https://www.digitalocea
 
 * [Prerequisites](docs/01-prerequisites.md)
 * [Installing the Client Tools](docs/02-client-tools.md)
-* [Provisioning Compute Resources](docs/03-compute-resources.md) - WIP
+* [Provisioning Compute Resources](docs/03-compute-resources.md)
 * [Provisioning the CA and Generating TLS Certificates](docs/04-certificate-authority.md)
-* [Generating Kubernetes Configuration Files for Authentication](docs/05-kubernetes-configuration-files.md) - WIP
-* [Generating the Data Encryption Config and Key](docs/06-data-encryption-keys.md) - WIP
-* [Bootstrapping the etcd Cluster](docs/07-bootstrapping-etcd.md) - WIP
-* [Bootstrapping the Kubernetes Control Plane](docs/08-bootstrapping-kubernetes-controllers.md) - WIP
-* [Bootstrapping the Kubernetes Worker Nodes](docs/09-bootstrapping-kubernetes-workers.md) - WIP
-* [Configuring kubectl for Remote Access](docs/10-configuring-kubectl.md) - WIP
-* [Provisioning Pod Network Routes](docs/11-pod-network-routes.md) - WIP
-* [Deploying the DNS Cluster Add-on](docs/12-dns-addon.md) - WIP
-* [Smoke Test](docs/13-smoke-test.md) - WIP
-* [Cleaning Up](docs/14-cleanup.md) - WIP
+* [Generating Kubernetes Configuration Files for Authentication](docs/05-kubernetes-configuration-files.md)
+* [Generating the Data Encryption Config and Key](docs/06-data-encryption-keys.md)
+* [Bootstrapping the etcd Cluster](docs/07-bootstrapping-etcd.md)
+* [Bootstrapping the Kubernetes Control Plane](docs/08-bootstrapping-kubernetes-controllers.md)
+* [Bootstrapping the Kubernetes Worker Nodes](docs/09-bootstrapping-kubernetes-workers.md)
+* [Configuring kubectl for Remote Access](docs/10-configuring-kubectl.md)
+* [Provisioning Pod Network Routes](docs/11-pod-network-routes.md) - WIP (this is where everything falls over)
+* [Deploying the DNS Cluster Add-on](docs/12-dns-addon.md)
+* [Smoke Test](docs/13-smoke-test.md)
+* [Cleaning Up](docs/14-cleanup.md)

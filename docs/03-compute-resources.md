@@ -9,7 +9,7 @@
 ```sh
 VPC_ID=$(doctl vpcs create \
   --description kubernetes-the-hard-way \
-  --ip-range 10.0.0.0/24 \
+  --ip-range 10.0.0.0/16 \
   --name kubernetes \
   --region ${D0_REGION}
   --output json | jq -r '.[].id')
@@ -29,12 +29,15 @@ aws ec2 attach-internet-gateway --internet-gateway-id ${INTERNET_GATEWAY_ID} --v
 
 ```sh
 LOAD_BALANCER_ID=$(doctl compute load-balancer create \
-  --name kubernetes \
+  --name kubernetes-lb \
   --region ${DO_REGION} \
-  --forwarding-rules entry_protocol:tcp,entry_port:443,target_protocol:tcp,target_port:6443 \
+  --forwarding-rules entry_protocol:https,entry_port:443,target_protocol:https,target_port:6443,certificate_id:,tls_passthrough:true \
+  --health-check protocol:https,port:6443,path:/healthz,check_interval_seconds:10,response_timeout_seconds:5,healthy_threshold:5,unhealthy_threshold:3 \
   --vpc-uuid ${VPC_ID} \
   --output json | jq -r '.[].id')
 ```
+
+> the load balancer takes about a minute or so to be created, so if the ip address doesn't resolve with the following command, try again a bit later.
 
 ```sh
 KUBERNETES_PUBLIC_ADDRESS=$(doctl compute load-balancer list \
@@ -52,8 +55,8 @@ ssh-keygen -t rsa -b 4096 -f kubernetes.id_rsa
 then import it via the doctl CLI
 
 ```sh
-SSH_KEY_FINGERPRINT=$(doctl compute ssh-key import kubernetes \
-  --public-key-file kubernetes.id_rsa.pub | jq -r '.[0].fingerprint')
+SSH_KEY_FINGERPRINT=$(doctl compute ssh-key import kubernetes-key \
+  --public-key-file kubernetes.id_rsa.pub --output json | jq -r '.[].fingerprint')
 ```
 
 ### Kubernetes Controllers
@@ -65,11 +68,10 @@ for i in 0 1 2; do
   doctl compute droplet create controller-${i} \
     --image ubuntu-18-04-x64 \
     --size s-1vcpu-1gb \
-    --enable-private-networking \
     --region ${DO_REGION} \
     --ssh-keys ${SSH_KEY_FINGERPRINT} \
     --tag-names kubernetes,controller \
-    --vpc-uuid ${VPC_ID} \
+    --vpc-uuid ${VPC_ID}
 done
 ```
 
@@ -101,11 +103,10 @@ for i in 0 1 2; do
   doctl compute droplet create worker-${i} \
     --image ubuntu-18-04-x64 \
     --size s-1vcpu-1gb \
-    --enable-private-networking \
     --region ${DO_REGION} \
     --ssh-keys ${SSH_KEY_FINGERPRINT} \
     --tag-names kubernetes,worker \
-    --vpc-uuid ${VPC_ID} \
+    --vpc-uuid ${VPC_ID}
 done
 ```
 
@@ -126,11 +127,17 @@ done
 
 ```sh
 doctl compute firewall create \
-  --inbound-rules protocol:tcp,ports:22,address:0.0.0.0/0 \
-  --inbound-rules protocol:tcp,ports:6443,address:0.0.0.0/0 \
-  --inbound-rules protocol:tcp,ports:443,address:0.0.0.0/0 \
-  --inbound-rules protocol:icmp,ports:1,address:0.0.0.0/0 \
-  --name kubernetes \
+  --inbound-rules "protocol:icmp,address:0.0.0.0/0 \
+  protocol:tcp,ports:22,address:0.0.0.0/0 \
+  protocol:tcp,ports:6443,address:0.0.0.0/0 \
+  protocol:tcp,ports:443,address:0.0.0.0/0 \
+  protocol:tcp,ports:all,address:10.0.0.0/16 \
+  protocol:udp,ports:all,address:10.0.0.0/16 \
+  protocol:icmp,address:10.0.0.0/16" \
+  --outbound-rules "protocol:icmp,address:0.0.0.0/0 \
+  protocol:tcp,ports:all,address:0.0.0.0/0 \
+  protocol:udp,ports:all,address:0.0.0.0/0" \
+  --name kubernetes-firewall \
   --tag-names kubernetes
 ```
 

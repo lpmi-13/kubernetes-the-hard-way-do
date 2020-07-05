@@ -188,12 +188,11 @@ Copy the appropriate `kubelet` and `kube-proxy` kubeconfig files to each worker 
 
 ```
 for instance in worker-0 worker-1 worker-2; do
-  external_ip=$(doctl compute droplet list ${i} \
-    --output json | jq -cr '.[].networks.v4 | .[] \
-    | select(.type == "public") | .ip_address')
+  external_ip=$(doctl compute droplet list ${instance} \
+    --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
   scp -i kubernetes.id_rsa \
-    ${instance}.kubeconfig kube-proxy.kubeconfig ubuntu@${external_ip}:~/
+    ${instance}.kubeconfig kube-proxy.kubeconfig root@${external_ip}:~/
 done
 ```
 
@@ -201,12 +200,11 @@ Copy the appropriate `kube-controller-manager` and `kube-scheduler` kubeconfig f
 
 ```
 for instance in controller-0 controller-1 controller-2; do
-  external_ip=$(doctl compute droplet list ${i} \
-    --output json | jq -cr '.[].networks.v4 | .[] \
-    | select(.type == "public") | .ip_address')
+  external_ip=$(doctl compute droplet list ${instance} \
+    --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
   
   scp -i kubernetes.id_rsa \
-    admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig ubuntu@${external_ip}:~/
+    admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig root@${external_ip}:~/
 done
 ```
 

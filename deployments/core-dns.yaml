@@ -53,6 +53,7 @@ metadata:
 data:
   Corefile: |
     .:53 {
+        log
         errors
         health
         ready
@@ -67,6 +68,7 @@ data:
         reload
         loadbalance
     }
+
 ---
 apiVersion: apps/v1
 kind: Deployment
