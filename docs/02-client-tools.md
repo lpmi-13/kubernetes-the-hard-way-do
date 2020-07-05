@@ -1,6 +1,6 @@
 # Installing the Client Tools
 
-In this lab you will install the command line utilities required to complete this tutorial: [cfssl](https://github.com/cloudflare/cfssl), [cfssljson](https://github.com/cloudflare/cfssl), and [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl).
+In this lab you will install the command line utilities required to complete this tutorial: [cfssl](https://github.com/cloudflare/cfssl), [cfssljson](https://github.com/cloudflare/cfssl), [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl), and [jq](https://stedolan.github.io/jq/download/).
 
 
 ## Install CFSSL
@@ -116,7 +116,7 @@ Client Version: version.Info{Major:"1", Minor:"17", GitVersion:"v1.17.2", GitCom
 
 ## Install jq (because Digital Ocean doesn't have any nice output filtering on resource creation)
 
-follow the instructions [here](https://stedolan.github.io/jq/download/).
+for non-standard systems, follow the instructions [here](https://stedolan.github.io/jq/download/).
 
 ### OS X
 
@@ -124,7 +124,7 @@ follow the instructions [here](https://stedolan.github.io/jq/download/).
 brew install jq
 ```
 
-### Linux (for ubuntu/debian...for other distros see the link above)
+### Linux (on ubuntu/debian...for other distros see the link above)
 
 ```
 sudo apt-get install jq

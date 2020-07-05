@@ -11,11 +11,11 @@ VPC_ID=$(doctl vpcs create \
   --description kubernetes-the-hard-way \
   --ip-range 10.0.0.0/24 \
   --name kubernetes \
-  --region $D0_REGION
-  --output json | jq -r '.[0].id')
+  --region ${D0_REGION}
+  --output json | jq -r '.[].id')
 ```
 
-> subnets as a network abstraction don't exist in Digital Ocean. All the droplets are private by default, and enabling public access is on a per-droplet basis.
+> subnets as a network abstraction don't exist in Digital Ocean. Still trying to work out whether all the droplets are private by default (which you would assume would be more obvious)...it looks like all droplets get a public and private IP address, though presumably the firewalls control whether they are actually publicly accessible
 
 ### Internet Gateway (this also might not exist in DO, but still investigating)
 
@@ -30,15 +30,15 @@ aws ec2 attach-internet-gateway --internet-gateway-id ${INTERNET_GATEWAY_ID} --v
 ```sh
 LOAD_BALANCER_ID=$(doctl compute load-balancer create \
   --name kubernetes \
-  --region $DO_REGION \
+  --region ${DO_REGION} \
   --forwarding-rules entry_protocol:tcp,entry_port:443,target_protocol:tcp,target_port:6443 \
-  --vpc-uuid $VPC_ID \
-  --output json | jq -r '.[0].id')
+  --vpc-uuid ${VPC_ID} \
+  --output json | jq -r '.[].id')
 ```
 
 ```sh
 KUBERNETES_PUBLIC_ADDRESS=$(doctl compute load-balancer list \
-  --output json | jq -r '.[0].ip')
+  --output json | jq -r '.[].ip')
 ```
 
 ## Compute Instances
@@ -58,7 +58,7 @@ SSH_KEY_FINGERPRINT=$(doctl compute ssh-key import kubernetes \
 
 ### Kubernetes Controllers
 
-Using `s-1vcpu-1gb` instances, slightly smaller than the t3.micro instances used in the original tutorial, but should get the job done
+Using `s-1vcpu-1gb` instances, slightly smaller than the t3.micro instances used in the AWS version, but should get the job done
 
 ```sh
 for i in 0 1 2; do
@@ -66,10 +66,10 @@ for i in 0 1 2; do
     --image ubuntu-18-04-x64 \
     --size s-1vcpu-1gb \
     --enable-private-networking \
-    --region $DO_REGION \
-    --ssh-keys $SSH_KEY_FINGERPRINT \
+    --region ${DO_REGION} \
+    --ssh-keys ${SSH_KEY_FINGERPRINT} \
     --tag-names kubernetes,controller \
-    --vpc-uuid $VPC_ID \
+    --vpc-uuid ${VPC_ID} \
 done
 ```
 
@@ -102,12 +102,25 @@ for i in 0 1 2; do
     --image ubuntu-18-04-x64 \
     --size s-1vcpu-1gb \
     --enable-private-networking \
-    --region $DO_REGION \
-    --ssh-keys $SSH_KEY_FINGERPRINT \
+    --region ${DO_REGION} \
+    --ssh-keys ${SSH_KEY_FINGERPRINT} \
     --tag-names kubernetes,worker \
-    --vpc-uuid $VPC_ID \
+    --vpc-uuid ${VPC_ID} \
 done
 ```
+
+### Add the Controller nodes to the load balancer
+
+```sh
+for i in 0 1 2; do
+  droplet_id=$(doctl compute droplet list controller-${i} \
+    --output json | jq -r '.[].id')
+  doctl compute load-balancer add-droplets ${LOAD_BALANCER_ID} \
+    --droplet-ids ${droplet_id}
+  echo added dropletId: ${droplet_id}
+done
+```
+
 
 ### Security Groups (aka Firewall Rules) ...we need droplets before we can create any ingress/egress rules
 
