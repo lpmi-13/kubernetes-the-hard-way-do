@@ -17,14 +17,6 @@ VPC_ID=$(doctl vpcs create \
 
 > subnets as a network abstraction don't exist in Digital Ocean. Still trying to work out whether all the droplets are private by default (which you would assume would be more obvious)...it looks like all droplets get a public and private IP address, though presumably the firewalls control whether they are actually publicly accessible
 
-### Internet Gateway (this also might not exist in DO, but still investigating)
-
-```sh
-INTERNET_GATEWAY_ID=$(aws ec2 create-internet-gateway --output text --query 'InternetGateway.InternetGatewayId')
-aws ec2 create-tags --resources ${INTERNET_GATEWAY_ID} --tags Key=Name,Value=kubernetes
-aws ec2 attach-internet-gateway --internet-gateway-id ${INTERNET_GATEWAY_ID} --vpc-id ${VPC_ID}
-```
-
 ### Kubernetes Public Access - Create a Network Load Balancer
 
 ```sh
@@ -75,27 +67,6 @@ for i in 0 1 2; do
 done
 ```
 
-> might not actually need any block storage...I guess we'll find out...
-```sh
-for i in 0 1 2; do
-  instance_id=$(aws ec2 run-instances \
-    --associate-public-ip-address \
-    --image-id ${IMAGE_ID} \
-    --count 1 \
-    --key-name kubernetes \
-    --security-group-ids ${SECURITY_GROUP_ID} \
-    --instance-type t3.micro \
-    --private-ip-address 10.0.1.1${i} \
-    --user-data "name=controller-${i}" \
-    --subnet-id ${SUBNET_ID} \
-    --block-device-mappings='{"DeviceName": "/dev/sda1", "Ebs": { "VolumeSize": 50 }, "NoDevice": "" }' \
-    --output text --query 'Instances[].InstanceId')
-  aws ec2 modify-instance-attribute --instance-id ${instance_id} --no-source-dest-check
-  aws ec2 create-tags --resources ${instance_id} --tags "Key=Name,Value=controller-${i}"
-  echo "controller-${i} created "
-done
-```
-
 ### Kubernetes Workers
 
 ```sh
@@ -123,7 +94,7 @@ done
 ```
 
 
-### Security Groups (aka Firewall Rules) ...we need droplets before we can create any ingress/egress rules
+### Security Groups (aka Firewall Rules) ...we have to wait til after creating droplets before we can create any ingress/egress rules
 
 ```sh
 doctl compute firewall create \
@@ -132,8 +103,7 @@ doctl compute firewall create \
   protocol:tcp,ports:6443,address:0.0.0.0/0 \
   protocol:tcp,ports:443,address:0.0.0.0/0 \
   protocol:tcp,ports:all,address:10.0.0.0/16 \
-  protocol:udp,ports:all,address:10.0.0.0/16 \
-  protocol:icmp,address:10.0.0.0/16" \
+  protocol:udp,ports:all,address:10.0.0.0/16" \
   --outbound-rules "protocol:icmp,address:0.0.0.0/0 \
   protocol:tcp,ports:all,address:0.0.0.0/0 \
   protocol:udp,ports:all,address:0.0.0.0/0" \
