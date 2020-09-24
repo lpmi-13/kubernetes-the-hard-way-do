@@ -165,11 +165,8 @@ EOF
 ### Configure the Kubelet
 
 ```
-WORKER_NAME=$(hostame)
-echo "${WORKER_NAME}"
-
-sudo mv ${WORKER_NAME}-key.pem ${WORKER_NAME}.pem /var/lib/kubelet/
-sudo mv ${WORKER_NAME}.kubeconfig /var/lib/kubelet/kubeconfig
+sudo mv $(hostname)-key.pem $(hostname).pem /var/lib/kubelet/
+sudo mv $(hostname).kubeconfig /var/lib/kubelet/kubeconfig
 sudo mv ca.pem /var/lib/kubernetes/
 ```
 

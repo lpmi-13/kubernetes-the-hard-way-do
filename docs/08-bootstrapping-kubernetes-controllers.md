@@ -203,7 +203,7 @@ sudo systemctl start kube-apiserver kube-controller-manager kube-scheduler
 
 > Allow up to 30 seconds for the Kubernetes API Server to fully initialize.
 
-Now check status of your controller components
+Now check status of your controller components (do this from one of the controller instances)
 ```sh
 kubectl get componentstatuses
 ```
