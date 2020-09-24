@@ -52,13 +52,6 @@ The instance internal IP address will be used to serve client requests and commu
 INTERNAL_IP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address)
 ```
 
-Each etcd member must have a unique name within an etcd cluster. Set the etcd name to match the hostname of the current compute instance:
-
-```
-ETCD_NAME=$(hostname)
-echo "${ETCD_NAME}"
-```
-
 Create the `etcd.service` systemd unit file:
 
 ```
@@ -69,7 +62,7 @@ Documentation=https://github.com/coreos
 
 [Service]
 ExecStart=/usr/local/bin/etcd \\
-  --name ${ETCD_NAME} \\
+  --name $(hostname) \\
   --cert-file=/etc/etcd/kubernetes.pem \\
   --key-file=/etc/etcd/kubernetes-key.pem \\
   --peer-cert-file=/etc/etcd/kubernetes.pem \\
