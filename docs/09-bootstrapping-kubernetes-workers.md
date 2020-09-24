@@ -290,10 +290,10 @@ kubectl get nodes --kubeconfig admin.kubeconfig
 > output
 
 ```
-NAME             STATUS   ROLES    AGE   VERSION
-ip-10-0-1-20   Ready    <none>   51s   v1.17.2
-ip-10-0-1-21   Ready    <none>   51s   v1.17.2
-ip-10-0-1-22   Ready    <none>   51s   v1.17.2
+NAME       STATUS   ROLES    AGE   VERSION
+worker-0   Ready    <none>   51s   v1.17.2
+worker-1   Ready    <none>   51s   v1.17.2
+worker-2   Ready    <none>   51s   v1.17.2
 ```
 
 Next: [Configuring kubectl for Remote Access](10-configuring-kubectl.md)
