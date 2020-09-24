@@ -8,7 +8,7 @@ The commands in this lab must be run on each controller instance: `controller-0`
 
 ```
 for instance in controller-0 controller-1 controller-2; do
-  external_ip=$(doctl compute droplet list ${i} \
+  external_ip=$(doctl compute droplet list ${instance} \
     --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
   echo ssh -i kubernetes.id_rsa root@$external_ip
