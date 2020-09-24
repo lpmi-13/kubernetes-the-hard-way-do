@@ -1,39 +1,51 @@
 # Provisioning Pod Network Routes
 
-Pods scheduled to a node receive an IP address from the node's Pod CIDR range. At this point pods can not communicate with other pods running on different nodes due to missing network [routes](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html).
+Pods scheduled to a node receive an IP address from the node's Pod CIDR range. At this point pods can not communicate with other pods running on different nodes due to missing network routes. 
 
 In this lab you will create a route for each worker node that maps the node's Pod CIDR range to the node's internal IP address.
+
+Essentially, we want a pod in each worker node to be able to find a pod in another worker node. So in case of a pod on worker-0 communicating with a pod on worker-1, the route is something like the following:
+
+- pod on worker-0 has a CIDR range of 10.200.0.0/24 (from the kubelet config on that node). It needs to know that for contacting a pod in CIDR range 10.200.1.0/24 (a different subnet), it can use the worker-1 node as a gateway.
+- we want to add a route like the following:
+
+```sh
+$ route add -net 10.200.1.0/24 gw 10.0.0.7
+```
+(10.200.1.0/24 is the possible range for a pod on worker-1, and 10.0.0.7 is the internal IP address for worker-1)
 
 > There are [other ways](https://kubernetes.io/docs/concepts/cluster-administration/networking/#how-to-achieve-this) to implement the Kubernetes networking model.
 
 ## The Routing Table and routes
 
-In this section you will gather the information required to create routes in the `kubernetes-the-hard-way` VPC network and use that to create route table entries. 
-
-In production workloads this functionality will be provided by CNI plugins like flannel, calico, amazon-vpc-cni-k8s. Doing this by hand makes it easier to understand what those plugins do behind the scenes.
-
 Print the internal IP address and Pod CIDR range for each worker instance and create route table entries:
 
-```sh
-for instance in worker-0 worker-1 worker-2; do
-  instance_id_ip="$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=${instance}" \
-    --output text --query 'Reservations[].Instances[].[InstanceId,PrivateIpAddress]')"
-  instance_id="$(echo "${instance_id_ip}" | cut -f1)"
-  instance_ip="$(echo "${instance_id_ip}" | cut -f2)"
-  pod_cidr="$(aws ec2 describe-instance-attribute \
-    --instance-id "${instance_id}" \
-    --attribute userData \
-    --output text --query 'UserData.Value' \
-    | base64 --decode | tr "|" "\n" | grep "^pod-cidr" | cut -d'=' -f2)"
-  echo "${instance_ip} ${pod_cidr}"
+run the following commands in each of the worker nodes:
 
-  aws ec2 create-route \
-    --route-table-id "${ROUTE_TABLE_ID}" \
-    --destination-cidr-block "${pod_cidr}" \
-    --instance-id "${instance_id}"
-done
+- worker-0
+
+```sh
+route add -net 10.200.1.0/24 gw 10.0.0.7
+route add -net 10.200.2.0/24 gw 10.0.0.8
 ```
+
+- worker-1
+
+```sh
+route add -net 10.200.0.0/24 gw 10.0.0.6
+route add -net 10.200.2.0/24 gw 10.0.0.8
+```
+
+- worker-2
+
+```sh
+route add -net 10.200.0.0/24 gw 10.0.0.6
+route add -net 10.200.1.0/24 gw 10.0.0.7
+```
+
+**STILL TRYING TO FIGURE THIS OUT, SO THIS IS AS FAR AS WE GO WITH THE EDITS TO THIS PAGE ...its very possible that this works and we don't need the rest of the page...but also possible that it doesn't work at all**
+
+---
 
 > output
 
