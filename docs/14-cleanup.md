@@ -35,7 +35,7 @@ Delete the firewall:
 
 ```
 FIREWALL_ID=$(doctl compute firewall list --output json \
-  | jq -cr '.[] | select(.name == "kuberenetes-firewall" | .id')
+  | jq -cr '.[] | select(.name == "kuberenetes-firewall") | .id')
 doctl compute firewall delete ${FIREWALL_ID} -f
 ```
 
