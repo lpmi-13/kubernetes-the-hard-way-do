@@ -12,6 +12,8 @@ This tutorial leverages [Digital Ocean](https://www.digitalocean.com/) to stream
 
 Follow the DO CLI [documentation](https://github.com/digitalocean/doctl) to install and configure the `doctl` command line utility.
 
+The current walkthrough was done with version 1.60.0.
+
 Verify the DO CLI version using:
 
 ```

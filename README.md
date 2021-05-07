@@ -9,6 +9,7 @@ This is a fork of the outstanding [Kubernetes The Hard Way - AWS](https://github
 3. containerd v1.3.2
 4. CNI plugins v0.8.5
 5. etcd v3.3.18
+6. doctl v1.60.0
 
 # Kubernetes The Hard Way
 
@@ -50,3 +51,12 @@ This tutorial assumes you have access to [Digital Ocean](https://www.digitalocea
 * [Deploying the DNS Cluster Add-on](docs/12-dns-addon.md)
 * [Smoke Test](docs/13-smoke-test.md)
 * [Cleaning Up](docs/14-cleanup.md)
+
+## Scripted setup
+
+While working through this, it became obvious that it would be helpful to have a way to get back to where I was at a current point. So the scripts in the `scripts/` folder follow along with the documentation steps.
+
+So to get to the end state after completing all the steps in `03-compute-resources.md`, you can just run
+```bash
+$ ./scripts/3.sh
+```
