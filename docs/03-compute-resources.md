@@ -11,7 +11,7 @@ VPC_ID=$(doctl vpcs create \
   --description kubernetes-the-hard-way \
   --ip-range 10.0.0.0/16 \
   --name kubernetes \
-  --region ${DO_REGION}
+  --region ${DO_REGION} \
   --output json | jq -r '.[].id')
 ```
 
