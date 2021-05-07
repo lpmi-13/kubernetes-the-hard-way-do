@@ -18,6 +18,9 @@ else
   doctl compute load-balancer delete $LOAD_BALANCER_ID -f;
 fi
 
+# sometimes it takes the load balancer a few seconds to disappear from the VPC, and the VPC can't be deleted while the load balancer is still registered
+sleep 10
+
 FIREWALL_ID=$(doctl compute firewall list --output json \
   | jq -cr '.[] | select(.name == "kuberenetes-firewall") | .id')
 if [ -z ${FIREWALL_ID} ]; then
