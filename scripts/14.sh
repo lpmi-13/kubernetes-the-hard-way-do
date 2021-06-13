@@ -63,4 +63,4 @@ else
 fi
 
 echo "cleaning up local *.{csr,json,kubeconfig,pem,yaml} files"
-rm -rf "./*.{csr,json,kubeconfig,pem,yaml}"
+rm -rf ./*.{csr,json,kubeconfig,pem,yaml}
