@@ -1,3 +1,4 @@
 *.pem
 *.json
 *.csr
+*id_rsa*
