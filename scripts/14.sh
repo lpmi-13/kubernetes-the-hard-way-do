@@ -62,5 +62,5 @@ else
   doctl vpcs delete ${VPC_ID} -f
 fi
 
-echo "cleaning up local *.{csr,json,kubeconfig,pem} files"
-rm -rf "./*.{csr,json,kubeconfig,pem}"
+echo "cleaning up local *.{csr,json,kubeconfig,pem,yaml} files"
+rm -rf "./*.{csr,json,kubeconfig,pem,yaml}"
