@@ -54,7 +54,7 @@ This tutorial assumes you have access to [Digital Ocean](https://www.digitalocea
 
 ## Scripted setup
 
-While working through this, it became obvious that it would be helpful to have a way to get back to where I was at a current point. So the scripts in the `scripts/` folder follow along with the documentation steps.
+While working through this, it became obvious that it would be helpful to have a way to get back to where I was at a given point. So the scripts in the `scripts/` folder follow along with the documentation steps.
 
 So to get to the end state after completing all the steps in `03-compute-resources.md`, you can just run
 ```bash
@@ -62,3 +62,5 @@ $ ./scripts/3.sh
 ```
 
 *NOTE*: for now, not all the scripts are finished, so at any point, if you want to tear everything down, just run the final script, `./scripts/14.sh`
+
+*NOTE #2*: Digital Ocean's service isn't super dependable, so while running the scripts you may encounter random 5XX errors. Just try again after a little time.
