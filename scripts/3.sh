@@ -1,6 +1,6 @@
 VPC_ID=$(doctl vpcs create \
   --description kubernetes-the-hard-way \
-  --ip-range 10.0.0.0/16 \
+  --ip-range 10.240.0.0/24 \
   --name kubernetes \
   --region ${DO_REGION} \
   --output json | jq -r '.[].id')
@@ -72,8 +72,10 @@ doctl compute firewall create \
 protocol:tcp,ports:22,address:0.0.0.0/0 \
 protocol:tcp,ports:6443,address:0.0.0.0/0 \
 protocol:tcp,ports:443,address:0.0.0.0/0 \
-protocol:tcp,ports:all,address:10.0.0.0/16 \
-protocol:udp,ports:all,address:10.0.0.0/16" \
+protocol:tcp,ports:all,address:10.240.0.0/24 \
+protocol:udp,ports:all,address:10.240.0.0/24 \
+protocol:tcp,ports:all,address:10.200.0.0/16 \
+protocol:udp,ports:all,address:10.200.0.0/16" \
   --outbound-rules "protocol:icmp,address:0.0.0.0/0 \
 protocol:tcp,ports:all,address:0.0.0.0/0 \
 protocol:udp,ports:all,address:0.0.0.0/0" \
