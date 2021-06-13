@@ -60,3 +60,5 @@ So to get to the end state after completing all the steps in `03-compute-resourc
 ```bash
 $ ./scripts/3.sh
 ```
+
+*NOTE*: for now, not all the scripts are finished, so at any point, if you want to tear everything down, just run the final script, `./scripts/14.sh`
