@@ -1,7 +1,5 @@
 # Provisioning Compute Resources
 
-[Guide](https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/03-compute-resources.md)
-
 ## Networking
 
 ### VPC

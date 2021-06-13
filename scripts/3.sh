@@ -33,3 +33,49 @@ KUBERNETES_PUBLIC_ADDRESS=$(doctl compute load-balancer list \
   --output json | jq -r '.[].ip')
 
 echo "KUBERNETES_PUBLIC_ADDRESS is $KUBERNETES_PUBLIC_ADDRESS"
+
+ssh-keygen -t rsa -b 4096 -f kubernetes.id_rsa -N ""
+
+SSH_KEY_FINGERPRINT=$(doctl compute ssh-key import kubernetes-key \
+  --public-key-file kubernetes.id_rsa.pub --output json | jq -r '.[].fingerprint')
+
+for i in 0 1 2; do
+  doctl compute droplet create controller-${i} \
+    --image ubuntu-18-04-x64 \
+    --size s-1vcpu-1gb \
+    --region ${DO_REGION} \
+    --ssh-keys ${SSH_KEY_FINGERPRINT} \
+    --tag-names kubernetes,controller \
+    --vpc-uuid ${VPC_ID}
+done
+
+for i in 0 1 2; do
+  doctl compute droplet create worker-${i} \
+    --image ubuntu-18-04-x64 \
+    --size s-1vcpu-1gb \
+    --region ${DO_REGION} \
+    --ssh-keys ${SSH_KEY_FINGERPRINT} \
+    --tag-names kubernetes,worker \
+    --vpc-uuid ${VPC_ID}
+done
+
+for i in 0 1 2; do
+  droplet_id=$(doctl compute droplet list controller-${i} \
+    --output json | jq -r '.[].id')
+  doctl compute load-balancer add-droplets ${LOAD_BALANCER_ID} \
+    --droplet-ids ${droplet_id}
+  echo added dropletId: ${droplet_id}
+done
+
+doctl compute firewall create \
+  --inbound-rules "protocol:icmp,address:0.0.0.0/0 \
+protocol:tcp,ports:22,address:0.0.0.0/0 \
+protocol:tcp,ports:6443,address:0.0.0.0/0 \
+protocol:tcp,ports:443,address:0.0.0.0/0 \
+protocol:tcp,ports:all,address:10.0.0.0/16 \
+protocol:udp,ports:all,address:10.0.0.0/16" \
+  --outbound-rules "protocol:icmp,address:0.0.0.0/0 \
+protocol:tcp,ports:all,address:0.0.0.0/0 \
+protocol:udp,ports:all,address:0.0.0.0/0" \
+  --name kubernetes-firewall \
+  --tag-names kubernetes
