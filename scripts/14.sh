@@ -43,7 +43,7 @@ fi
 # sometimes it takes the load balancer a few seconds to disappear from the VPC, and the VPC can't be deleted while the load balancer is still registered
 sleep 10
 
-FIREWALL_ID=$(doctl compute firewall list --output json | jq -cr '.[] | select(.name == "kuberenetes-firewall") | .id')
+FIREWALL_ID=$(doctl compute firewall list --output json | jq -cr '.[] | select(.name == "kubernetes-firewall") | .id')
 if [ -z ${FIREWALL_ID} ]; then
   echo "no firewall found"
 else
@@ -61,3 +61,6 @@ else
   echo "deleting VPC: ${VPC_ID}"
   doctl vpcs delete ${VPC_ID} -f
 fi
+
+echo "cleaning up local *.{csr,json,pem} files"
+rm -rf "./*.{csr,json,pem}"
