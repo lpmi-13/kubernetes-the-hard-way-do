@@ -41,7 +41,7 @@ SSH_KEY_FINGERPRINT=$(doctl compute ssh-key import kubernetes-key \
 
 for i in 0 1 2; do
   doctl compute droplet create controller-${i} \
-    --image ubuntu-18-04-x64 \
+    --image ubuntu-20-04-x64 \
     --size s-1vcpu-1gb \
     --region ${DO_REGION} \
     --ssh-keys ${SSH_KEY_FINGERPRINT} \
@@ -51,7 +51,7 @@ done
 
 for i in 0 1 2; do
   doctl compute droplet create worker-${i} \
-    --image ubuntu-18-04-x64 \
+    --image ubuntu-20-04-x64 \
     --size s-1vcpu-1gb \
     --region ${DO_REGION} \
     --ssh-keys ${SSH_KEY_FINGERPRINT} \

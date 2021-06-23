@@ -61,4 +61,6 @@ for i in {3..7}; do
 done
 ```
 
+...though since this _is_ the hard way, it's recommended to only use scripts for the steps you've already completed manually, if you need to tear everything down and step away from the project for a bit, just so you don't burn through money on idling instances.
+
 *NOTE #1*: Digital Ocean's service isn't super dependable, so while running the scripts you may encounter random 5XX errors. Just try again after a little time.
