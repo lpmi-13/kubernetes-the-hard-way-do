@@ -219,127 +219,6 @@ ETag: "5d5279b8-264"
 Accept-Ranges: bytes
 ```
 
-## Untrusted Workloads
-
-This section will verify the ability to run untrusted workloads using [gVisor](https://github.com/google/gvisor).
-
-Create the `untrusted` pod:
-
-```
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: untrusted
-  annotations:
-    io.kubernetes.cri.untrusted-workload: "true"
-spec:
-  containers:
-    - name: webserver
-      image: gcr.io/hightowerlabs/helloworld:2.0.0
-EOF
-```
-
-### Verification
-
-In this section you will verify the `untrusted` pod is running under gVisor (runsc) by inspecting the assigned worker node.
-
-Verify the `untrusted` pod is running:
-
-```
-kubectl get pods -o wide
-```
-
-```
-NAME                     READY     STATUS    RESTARTS   AGE       IP           NODE             NOMINATED NODE
-busybox                  1/1       Running   0          5m        10.200.0.2   ip-10-0-1-20     <none>
-nginx-64f497f8fd-l6b78   1/1       Running   0          3m        10.200.1.2   ip-10-0-1-21     <none>
-untrusted                1/1       Running   0          8s        10.200.2.3   ip-10-0-1-22     <none>
-```
-
-
-Get the node name where the `untrusted` pod is running:
-
-```
-INSTANCE_NAME=$(kubectl get pod untrusted --output=jsonpath='{.spec.nodeName}')
-```
-
-If you deployed the cluster on US-EAST-1 use the command below:
-
-```
-INSTANCE_IP=$(doctl compute droplet list ${INSTANCE_NAME} \
-  --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
-```
-
-SSH into the worker node:
-
-```
-ssh -i kubernetes.id_rsa root@${INSTANCE_IP}
-```
-
-List the containers running under gVisor:
-
-```
-sudo runsc --root  /run/containerd/runsc/k8s.io list
-```
-
-```
-I0514 14:03:56.108368   14988 x:0] ***************************
-I0514 14:03:56.108548   14988 x:0] Args: [runsc --root /run/containerd/runsc/k8s.io list]
-I0514 14:03:56.108730   14988 x:0] Git Revision: 08879266fef3a67fac1a77f1ea133c3ac75759dd
-I0514 14:03:56.108787   14988 x:0] PID: 14988
-I0514 14:03:56.108838   14988 x:0] UID: 0, GID: 0
-I0514 14:03:56.108877   14988 x:0] Configuration:
-I0514 14:03:56.108912   14988 x:0]              RootDir: /run/containerd/runsc/k8s.io
-I0514 14:03:56.109000   14988 x:0]              Platform: ptrace
-I0514 14:03:56.109080   14988 x:0]              FileAccess: proxy, overlay: false
-I0514 14:03:56.109159   14988 x:0]              Network: sandbox, logging: false
-I0514 14:03:56.109238   14988 x:0]              Strace: false, max size: 1024, syscalls: []
-I0514 14:03:56.109315   14988 x:0] ***************************
-ID                                                                 PID         STATUS      BUNDLE                                                           CREATED                          OWNER
-3528c6b270c76858e15e10ede61bd1100b77519e7c9972d51b370d6a3c60adbb   14766       running     /run/containerd/io.containerd.runtime.v1.linux/k8s.io/3528c6b270c76858e15e10ede61bd1100b77519e7c9972d51b370d6a3c60adbb   2018-05-14T14:02:34.302378996Z
-7ff747c919c2dcf31e64d7673340885138317c91c7c51ec6302527df680ba981   14716       running     /run/containerd/io.containerd.runtime.v1.linux/k8s.io/7ff747c919c2dcf31e64d7673340885138317c91c7c51ec6302527df680ba981   2018-05-14T14:02:32.159552044Z
-I0514 14:03:56.111287   14988 x:0] Exiting with status: 0
-```
-
-Get the ID of the `untrusted` pod:
-
-```
-POD_ID=$(sudo crictl -r unix:///var/run/containerd/containerd.sock pods --name untrusted -q)
-```
-
-Get the ID of the `webserver` container running in the `untrusted` pod:
-
-```
-CONTAINER_ID=$(sudo crictl -r unix:///var/run/containerd/containerd.sock ps -p ${POD_ID} -q)
-```
-
-Use the gVisor `runsc` command to display the processes running inside the `webserver` container:
-
-```
-sudo runsc --root /run/containerd/runsc/k8s.io ps ${CONTAINER_ID}
-```
-
-> output
-
-```
-I0514 14:05:16.499237   15096 x:0] ***************************
-I0514 14:05:16.499542   15096 x:0] Args: [runsc --root /run/containerd/runsc/k8s.io ps 3528c6b270c76858e15e10ede61bd1100b77519e7c9972d51b370d6a3c60adbb]
-I0514 14:05:16.499597   15096 x:0] Git Revision: 08879266fef3a67fac1a77f1ea133c3ac75759dd
-I0514 14:05:16.499644   15096 x:0] PID: 15096
-I0514 14:05:16.499695   15096 x:0] UID: 0, GID: 0
-I0514 14:05:16.499734   15096 x:0] Configuration:
-I0514 14:05:16.499769   15096 x:0]              RootDir: /run/containerd/runsc/k8s.io
-I0514 14:05:16.499880   15096 x:0]              Platform: ptrace
-I0514 14:05:16.499962   15096 x:0]              FileAccess: proxy, overlay: false
-I0514 14:05:16.500042   15096 x:0]              Network: sandbox, logging: false
-I0514 14:05:16.500120   15096 x:0]              Strace: false, max size: 1024, syscalls: []
-I0514 14:05:16.500197   15096 x:0] ***************************
-UID       PID       PPID      C         STIME     TIME      CMD
-0         1         0         0         14:02     40ms      app
-I0514 14:05:16.501354   15096 x:0] Exiting with status: 0
-```
-
 # Check images/pods/containers on worker nodes using crictl
 
 Log in to a worker node. You can do this on all 3 workers to see the resources on each of them:
@@ -350,7 +229,7 @@ external_ip=$(doctl compute droplet list worker-0 \
 
 ssh -i kubernetes.id_rsa root@${external_ip}
 ```
-Run following commands and check output
+Run the following commands and check output
 
 ```sh
 sudo crictl -r unix:///var/run/containerd/containerd.sock images
