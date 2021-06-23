@@ -110,7 +110,7 @@ curl --head http://127.0.0.1:8080
 
 ```
 HTTP/1.1 200 OK
-Server: nginx/1.17.3
+Server: nginx/1.21.0
 Date: Sat, 14 Sep 2019 13:54:34 GMT
 Content-Type: text/html
 Content-Length: 612
@@ -158,7 +158,7 @@ kubectl exec -ti $POD_NAME -- nginx -v
 > output
 
 ```
-nginx version: nginx/1.17.3
+nginx version: nginx/1.21.0
 ```
 
 ## Services
@@ -183,7 +183,7 @@ NODE_PORT=$(kubectl get svc nginx \
 Create a firewall rule that allows remote access to the `nginx` node port:
 
 ```
-FIREWALL_ID=$(doctl firewall list -o json | jq -cr '.[].id'
+FIREWALL_ID=$(doctl compute firewall list --output json | jq -cr '.[] | select(.name == "kubernetes-firewall") | .id')
 doctl compute firewall add-rules ${FIREWALL_ID} \
   --inbound-rules protocol:tcp,ports:${NODE_PORT},address:0.0.0.0/0
 ```
