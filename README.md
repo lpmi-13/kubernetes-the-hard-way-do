@@ -56,11 +56,9 @@ This tutorial assumes you have access to [Digital Ocean](https://www.digitalocea
 
 While working through this, it became obvious that it would be helpful to have a way to get back to where I was at a given point. So the scripts in the `scripts/` folder follow along with the documentation steps.
 
-So to get to the end state after completing all the steps in `03-compute-resources.md`, you can just run
+So to get to the end state after completing all the steps in `07-bootstrapping-etcd.md`, you can just run
 ```bash
-$ ./scripts/3.sh
+$ ./scripts/3 && ./scripts/4.sh && ./scripts/5.sh && ./scripts/6.sh && ./scripts/7.sh
 ```
 
-*NOTE*: for now, not all the scripts are finished, so at any point, if you want to tear everything down, just run the final script, `./scripts/14.sh`
-
-*NOTE #2*: Digital Ocean's service isn't super dependable, so while running the scripts you may encounter random 5XX errors. Just try again after a little time.
+*NOTE #1*: Digital Ocean's service isn't super dependable, so while running the scripts you may encounter random 5XX errors. Just try again after a little time.
