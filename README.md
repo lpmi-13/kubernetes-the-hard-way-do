@@ -1,7 +1,5 @@
 # About
 
-**(NOTE: Extreme work in progress, and basically stopping all work on it until I can figure out either how to deploy flannel in here, or digital ocean implements some sort of route table mechanism a la AWS)**
-
 This is a fork of the outstanding [Kubernetes The Hard Way - AWS](https://github.com/prabhatsharma/kubernetes-the-hard-way-aws), itself a fork of the awesome [Kubernetes The Hard Way](https://github.com/kelseyhightower/kubernetes-the-hard-way) by Kelsey Hightower and is geared towards using it on Digital Ocean.
 
 1. Kubernetes v1.17.2
@@ -58,7 +56,9 @@ While working through this, it became obvious that it would be helpful to have a
 
 So to get to the end state after completing all the steps in `07-bootstrapping-etcd.md`, you can just run
 ```bash
-$ ./scripts/3 && ./scripts/4.sh && ./scripts/5.sh && ./scripts/6.sh && ./scripts/7.sh
+for i in {3..7}; do
+  bash scripts/$i.sh;
+done
 ```
 
 *NOTE #1*: Digital Ocean's service isn't super dependable, so while running the scripts you may encounter random 5XX errors. Just try again after a little time.
