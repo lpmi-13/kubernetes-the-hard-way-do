@@ -45,7 +45,7 @@ This tutorial assumes you have access to [Digital Ocean](https://www.digitalocea
 * [Bootstrapping the Kubernetes Control Plane](docs/08-bootstrapping-kubernetes-controllers.md)
 * [Bootstrapping the Kubernetes Worker Nodes](docs/09-bootstrapping-kubernetes-workers.md)
 * [Configuring kubectl for Remote Access](docs/10-configuring-kubectl.md)
-* [Provisioning Pod Network Routes](docs/11-pod-network-routes.md) - WIP (this is where everything falls over)
+* [Provisioning Pod Network Routes](docs/11-pod-network-routes.md)
 * [Deploying the DNS Cluster Add-on](docs/12-dns-addon.md)
 * [Smoke Test](docs/13-smoke-test.md)
 * [Cleaning Up](docs/14-cleanup.md)
