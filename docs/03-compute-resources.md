@@ -1,5 +1,13 @@
 # Provisioning Compute Resources
 
+to set the correct region in this shell, first run:
+
+```
+source scripts/set_env.sh
+```
+
+which should set your `$DO_REGION` to `lon1`, but feel free to update the region in that file if you'd prefer a different one.
+
 ## Networking
 
 ### VPC

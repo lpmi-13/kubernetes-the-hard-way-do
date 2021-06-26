@@ -54,6 +54,12 @@ This tutorial assumes you have access to [Digital Ocean](https://www.digitalocea
 
 While working through this, it became obvious that it would be helpful to have a way to get back to where I was at a given point. So the scripts in the `scripts/` folder follow along with the documentation steps.
 
+Be sure to set the region for your cloud resources before running the scripts:
+
+```
+source scripts/set_env.sh
+```
+
 So to get to the end state after completing all the steps in `07-bootstrapping-etcd.md`, you can just run
 ```bash
 for i in {3..7}; do
