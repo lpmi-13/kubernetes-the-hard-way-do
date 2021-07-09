@@ -100,7 +100,7 @@ done
 ```
 
 
-### Security Groups (aka Firewall Rules) ...we have to wait til after creating droplets before we can create any ingress/egress rules
+### Firewall Rules...we have to wait til after creating droplets before we can create any ingress/egress rules
 
 ```sh
 doctl compute firewall create \
