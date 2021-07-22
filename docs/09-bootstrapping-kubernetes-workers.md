@@ -266,6 +266,14 @@ EOF
 
 ### Start the Worker Services
 
+> because kubelet doesn't like when swap is enabled, let's turn that off
+
+```
+swapoff -a
+```
+
+...now we're ready to start up the services
+
 ```
 sudo systemctl daemon-reload
 sudo systemctl enable containerd kubelet kube-proxy

@@ -1,3 +1,5 @@
+source scripts/set_env.sh
+
 VPC_ID=$(doctl vpcs create \
   --description kubernetes-the-hard-way \
   --ip-range 10.240.0.0/24 \
