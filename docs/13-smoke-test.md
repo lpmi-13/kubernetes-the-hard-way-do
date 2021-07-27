@@ -237,11 +237,9 @@ sudo crictl -r unix:///var/run/containerd/containerd.sock images
 
 Output
 ```sh
-IMAGE                                                  TAG                 IMAGE ID            SIZE
-gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64   1.14.7              5feec37454f45       10.9MB
-gcr.io/google_containers/k8s-dns-kube-dns-amd64        1.14.7              5d049a8c4eec9       13.1MB
-gcr.io/google_containers/k8s-dns-sidecar-amd64         1.14.7              db76ee297b859       11.2MB
-k8s.gcr.io/pause                                       3.1                 da86e6ba6ca19       317kB
+IMAGE                       TAG                 IMAGE ID            SIZE
+docker.io/coredns/coredns   1.6.3               c4d3d16fe508b       14.2MB
+k8s.gcr.io/pause            3.1                 da86e6ba6ca19       317kB
 ```
 
 ```sh
@@ -250,8 +248,8 @@ sudo crictl -r unix:///var/run/containerd/containerd.sock pods
 
 Output
 ```sh
-POD ID              CREATED             STATE               NAME                        NAMESPACE           ATTEMPT
-9a304a19557f7       2 hours ago         Ready               kube-dns-864b8bdc77-c5vc2   kube-system         0
+POD ID              CREATED             STATE               NAME                       NAMESPACE           ATTEMPT
+82f30f3c08d6f       2 minutes ago       Ready               coredns-7cb4c7458d-vtrhp   kube-system         0
 ```
 
 ```sh
@@ -260,10 +258,8 @@ sudo crictl -r unix:///var/run/containerd/containerd.sock ps
 
 Output
 ```sh
-CONTAINER ID        IMAGE                                                                     CREATED             STATE               NAME                ATTEMPT
-611bfea53997d       sha256:db76ee297b8597fc007b23a90619314b8405bb1df6dcad189df0a123a09e7ecc   2 hours ago         Running             sidecar             0
-824f26368efc0       sha256:5feec37454f45d060c5f528c7d0bd4958df39e7ffd2e65ae42aae68bf78f69a5   2 hours ago         Running             dnsmasq             0
-f3d35b783af1e       sha256:5d049a8c4eec92b21ca4be399c260166d96569a1a52d497f4a0365bb55c1a18c   2 hours ago         Running             kubedns             0
+CONTAINER           IMAGE               CREATED             STATE               NAME                ATTEMPT             POD ID
+162ff0e76d2d1       c4d3d16fe508b       2 minutes ago       Running             coredns             0                   82f30f3c08d6f
 ```
 
 
