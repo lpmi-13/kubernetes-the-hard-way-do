@@ -179,9 +179,6 @@ Results:
 admin.kubeconfig
 ```
 
-
-## 
-
 ## Distribute the Kubernetes Configuration Files
 
 Copy the appropriate `kubelet` and `kube-proxy` kubeconfig files to each worker instance:
