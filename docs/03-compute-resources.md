@@ -47,14 +47,14 @@ KUBERNETES_PUBLIC_ADDRESS=$(doctl compute load-balancer list \
 ### SSH Key
 
 ```
-ssh-keygen -t rsa -b 4096 -f kubernetes.id_rsa
+ssh-keygen -t ed25519 -o -a 100 -f kubernetes.ed25519
 ```
 
 then import it via the doctl CLI
 
 ```sh
 SSH_KEY_FINGERPRINT=$(doctl compute ssh-key import kubernetes-key \
-  --public-key-file kubernetes.id_rsa.pub --output json | jq -r '.[].fingerprint')
+  --public-key-file kubernetes.ed25519.pub --output json | jq -r '.[].fingerprint')
 ```
 
 ### Kubernetes Controllers

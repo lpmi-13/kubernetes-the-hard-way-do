@@ -188,7 +188,7 @@ for instance in worker-0 worker-1 worker-2; do
   external_ip=$(doctl compute droplet list ${instance} \
     --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-  scp -i kubernetes.id_rsa \
+  scp -i kubernetes.ed25519 \
     ${instance}.kubeconfig kube-proxy.kubeconfig root@${external_ip}:~/
 done
 ```
@@ -200,7 +200,7 @@ for instance in controller-0 controller-1 controller-2; do
   external_ip=$(doctl compute droplet list ${instance} \
     --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
   
-  scp -i kubernetes.id_rsa \
+  scp -i kubernetes.ed25519 \
     admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig root@${external_ip}:~/
 done
 ```

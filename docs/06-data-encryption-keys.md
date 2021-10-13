@@ -39,7 +39,7 @@ for instance in controller-0 controller-1 controller-2; do
   external_ip=$(doctl compute droplet list ${instance} \
     --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
   
-  scp -i kubernetes.id_rsa encryption-config.yaml root@${external_ip}:~/
+  scp -i kubernetes.ed25519 encryption-config.yaml root@${external_ip}:~/
 done
 ```
 

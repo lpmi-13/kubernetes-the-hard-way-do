@@ -36,10 +36,10 @@ KUBERNETES_PUBLIC_ADDRESS=$(doctl compute load-balancer list \
 
 echo "KUBERNETES_PUBLIC_ADDRESS is $KUBERNETES_PUBLIC_ADDRESS"
 
-ssh-keygen -t rsa -b 4096 -f kubernetes.id_rsa -N ""
+ssh-keygen -t ed25519 -o -a 100 -f kubernetes.ed25519 -N ""
 
 SSH_KEY_FINGERPRINT=$(doctl compute ssh-key import kubernetes-key \
-  --public-key-file kubernetes.id_rsa.pub --output json | jq -r '.[].fingerprint')
+  --public-key-file kubernetes.ed25519.pub --output json | jq -r '.[].fingerprint')
 
 for i in 0 1 2; do
   doctl compute droplet create controller-${i} \

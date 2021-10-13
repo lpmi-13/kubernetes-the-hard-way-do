@@ -11,7 +11,7 @@ for instance in controller-0 controller-1 controller-2; do
   external_ip=$(doctl compute droplet list ${instance} \
     --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-  echo ssh -i kubernetes.id_rsa root@$external_ip
+  echo ssh -i kubernetes.ed25519 root@$external_ip
 done
 ```
 
@@ -231,7 +231,7 @@ The commands in this section will affect the entire cluster and only need to be 
 external_ip=$(doctl compute droplet list controller-0 \
   --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-ssh -i kubernetes.id_rsa root@${external_ip}
+ssh -i kubernetes.ed25519 root@${external_ip}
 ```
 
 Create the `system:kube-apiserver-to-kubelet` [ClusterRole](https://kubernetes.io/docs/admin/authorization/rbac/#role-and-clusterrole) with permissions to access the Kubelet API and perform most common tasks associated with managing pods:

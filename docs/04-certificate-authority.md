@@ -369,7 +369,7 @@ for instance in worker-0 worker-1 worker-2; do
   external_ip=$(doctl compute droplet list ${instance} \
     --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-  scp -i kubernetes.id_rsa ca.pem ${instance}-key.pem ${instance}.pem root@${external_ip}:~/
+  scp -i kubernetes.ed25519 ca.pem ${instance}-key.pem ${instance}.pem root@${external_ip}:~/
 done
 ```
 
@@ -380,7 +380,7 @@ for instance in controller-0 controller-1 controller-2; do
   external_ip=$(doctl compute droplet list ${instance} \
     --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-  scp -i kubernetes.id_rsa \
+  scp -i kubernetes.ed25519 \
     ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem \
     service-account-key.pem service-account.pem root@${external_ip}:~/
 done

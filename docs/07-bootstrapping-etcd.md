@@ -11,7 +11,7 @@ for instance in controller-0 controller-1 controller-2; do
   external_ip=$(doctl compute droplet list ${instance} \
     --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "public") | .ip_address')
 
-  echo ssh -i kubernetes.id_rsa root@$external_ip
+  echo ssh -i kubernetes.ed25519 root@$external_ip
 done
 ```
 

@@ -15,18 +15,18 @@ else
   done
 fi
 
-LOCAL_PRIVATE_SSH_KEY=kubernetes.id_rsa
+LOCAL_PRIVATE_SSH_KEY=kubernetes.ed25519
 if [ -f "$LOCAL_PRIVATE_SSH_KEY" ]; then
   echo "deleting local private ssh key previously generated"
-  rm -rf kubernetes.id_rsa
+  rm -rf kubernetes.ed25519
 else
   echo "no local private key found"
 fi
 
-LOCAL_PUBLIC_SSH_KEY=kubernetes.id_rsa.pub
+LOCAL_PUBLIC_SSH_KEY=kubernetes.ed25519.pub
 if [ -f "$LOCAL_PUBLIC_SSH_KEY" ]; then
   echo "deleting local public ssh key previously generated"
-  rm -rf kubernetes.id_rsa.pub
+  rm -rf kubernetes.ed25519.pub
 else
   echo "no local public key found"
 fi
