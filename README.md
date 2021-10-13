@@ -63,7 +63,7 @@ source scripts/set_env.sh
 So to get to the end state after completing all the steps in `07-bootstrapping-etcd.md`, you can just run
 ```bash
 for i in {3..7}; do
-  bash scripts/$i.sh;
+  ./scripts/$i.sh;
 done
 ```
 
