@@ -91,7 +91,7 @@ external_ip=$(doctl compute droplet list worker-${i} \
 internal_ip=$(doctl compute droplet list worker-${i} \
   --output json | jq -cr '.[].networks.v4 | .[] | select(.type == "private") | .ip_address')
 
-echo "generating certificate and private key for ${instance_hostnam}"
+echo "generating certificate and private key for ${instance_hostname}"
 
 cfssl gencert \
   -ca=ca.pem \
